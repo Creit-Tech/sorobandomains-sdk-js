@@ -1,0 +1,66 @@
+An SDK to search registered domains in the Registry Smart Contract from the [SorobanDomains](https://sorobandomains.org) protocol
+
+## Installation
+
+```shell
+npm i @creit.tech/sorobandomains-sdk
+```
+
+## The SorobanDomainsSDK class
+
+The first step will be creating a new instance from the main class.
+
+```typescript
+import * as SDK from '@stellar/stellar-sdk';
+import config from './myconfigfile.ts'
+
+const sdk: SorobanDomainsSDK = new SorobanDomainsSDK({
+  stellarSDK: SDK,
+  rpc: new SDK.SorobanRpc.Server(config.RPC_URL),
+  network: config.NETWORK,
+  contractId: config.CONTRACT_ID,
+  defaultFee: config.DEFAULT_FEE,
+  defaultTimeout: config.DEFAULT_TIMEOUT,
+  simulationAccount: config.SIMULATION_ACCOUNT,
+});
+```
+
+> If you want to know what each value represents, check the `SorobanDomainsSDKParams` interface in the `./src/types.ts` file.
+
+## Fetch a registered domain
+
+```typescript
+import { Record } from '@creit.tech/sorobandomains-sdk';
+
+const domainRecord: Record = await sdk.searchDomain({ domain: 'jhon' });
+const subDomainRecord: Record = await sdk.searchDomain({ domain: 'jhon', subDomain: 'payments' });
+```
+
+When searching for a domain, you can receive two types of errors: an expected error by the SDK or a simulation error.
+Currently, there is only one expected error by the SDK: `Domain404Error`.
+
+If you need to catch this type of error you can do this:
+```typescript
+import { Domain404Error } from '@creit.tech/sorobandomains-sdk';
+
+try {
+  const domainRecord: Record = await sdk.searchDomain({ domain: 'nonexistingrecord' });
+} catch (e) {
+  if (e.name === Domain404Error.name) {
+    // ... Do something here
+  } else {
+    // ... Do this instead
+  }
+}
+```
+
+> Note: In the example we check by the name and not if is an instance of the class because depending on your environment that validation method could fail.
+
+
+
+## License
+![](https://img.shields.io/badge/License-MIT-lightgrey)
+
+Licensed under the MIT License, Copyright © 2024-present Creit Technologies LLP.
+
+Checkout the `LICENSE.md` file for more details.

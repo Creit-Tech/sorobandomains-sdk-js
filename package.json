@@ -1,6 +1,6 @@
 {
   "name": "@creit.tech/sorobandomains-sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "An SDK to easily fetch domains from the sorobandomains.org protocol",
   "license": "MIT",
   "author": {

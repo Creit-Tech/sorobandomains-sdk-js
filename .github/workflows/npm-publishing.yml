@@ -15,7 +15,7 @@ jobs:
           node-version: '20.11.0'
           registry-url: 'https://registry.npmjs.org'
 
-      - run: npm -g pnpm && pnpm i
+      - run: npm -g i pnpm && pnpm i
 
       - run: pnpm run build
 

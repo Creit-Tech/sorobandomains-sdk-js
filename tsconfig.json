@@ -1,17 +1,42 @@
 {
   "compilerOptions": {
+    "skipLibCheck": true,
+    "target": "es2019",
+    "outDir": "build",
+    "rootDir": "src",
+    "moduleResolution": "node",
+    "module": "es2020",
     "declaration": true,
     "declarationMap": true,
-    "outDir": "./build",
-    "strict": true,
+    "inlineSources": true,
+    "inlineSourceMap": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "useDefineForClassFields": false,
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "traceResolution": false,
+    "listEmittedFiles": false,
+    "listFiles": false,
+    "pretty": true,
+    "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
+    "noImplicitOverride": true,
+    "lib": ["es2020"],
+    "types": [],
+    "typeRoots": ["node_modules/@types", "src/types"]
   },
-  "include": ["src"],
+  "include": ["src/**/*.ts"],
   "exclude": [
     "node_modules",
     "src/**/*.spec.ts",
     "src/**/*.test.ts"
-  ]
+  ],
+  "compileOnSave": false
 }

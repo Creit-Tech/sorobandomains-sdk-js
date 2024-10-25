@@ -1,22 +1,32 @@
 {
+  "root": true,
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "project": "tsconfig.json",
+    "ecmaVersion": 2020,
     "sourceType": "module"
   },
-  "plugins": ["@typescript-eslint/eslint-plugin", "jest"],
-  "extends": ["plugin:@typescript-eslint/recommended", "plugin:prettier/recommended"],
-  "root": true,
+  "plugins": ["@typescript-eslint"],
   "env": {
-    "node": true,
-    "jest": true
+    "browser": true
   },
-  "ignorePatterns": [".eslintrc.js"],
   "rules": {
-    "@typescript-eslint/no-empty-function": "off",
-    "@typescript-eslint/interface-name-prefix": "off",
+    "no-prototype-builtins": "off",
+    "@typescript-eslint/no-inferrable-types": "off",
+    "@typescript-eslint/ban-types": "off",
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",
-    "@typescript-eslint/no-explicit-any": "off"
+    "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      {
+        "argsIgnorePattern": "^_"
+      }
+    ]
   }
 }

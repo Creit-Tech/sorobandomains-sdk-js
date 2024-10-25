@@ -1,4 +1,12 @@
-import { Contract, xdr, TransactionBuilder, SorobanRpc, Networks, scValToNative } from '@stellar/stellar-sdk';
+import {
+  Contract,
+  xdr,
+  TransactionBuilder,
+  SorobanRpc,
+  Networks,
+  scValToNative,
+  nativeToScVal,
+} from '@stellar/stellar-sdk';
 
 export interface SorobanDomainsSDKParams {
   /**
@@ -12,13 +20,25 @@ export interface SorobanDomainsSDKParams {
     TransactionBuilder: typeof TransactionBuilder;
     SorobanRpc: typeof SorobanRpc;
     scValToNative: typeof scValToNative;
+    nativeToScVal: typeof nativeToScVal;
   };
 
   /**
-   * The Contract ID of the protocol you want to connect to.
+   * @deprecated use `vaultsContractId` instead, this will be removed in the future.
+   */
+  contractId?: string;
+
+  /**
+   * The Vaults contract ID of the protocol you want to connect to.
    * Check the current ids here: https://www.sorobandomains.org/docs/apps_and_contracts
    */
-  contractId: string;
+  vaultsContractId?: string;
+
+  /**
+   * The Contract ID of the Key-Value storage contract.
+   * Check the current ids here: https://www.sorobandomains.org/docs/apps_and_contracts
+   */
+  valuesDatabaseContractId?: string;
 
   /**
    * An instance of the rpc server you will connect to.
@@ -98,3 +118,12 @@ export enum RecordType {
   SubDomain = 'SubDomain',
 }
 export type Record = { type: RecordType.Domain; value: Domain } | { type: RecordType.SubDomain; value: SubDomain };
+
+export type DomainStorageValue = ['String', string] | ['Bytes', Buffer] | ['Number', bigint];
+export enum DefaultStorageKeys {
+  TOML = 'TOML',
+  TOML_HASH = 'TOML_HASH',
+  WEBSITE = 'WEBSITE',
+  WEBSITE_IPFS = 'WEBSITE_IPFS',
+  WEBSITE_IPNS = 'WEBSITE_IPNS',
+}

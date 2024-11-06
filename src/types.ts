@@ -41,6 +41,12 @@ export interface SorobanDomainsSDKParams {
   valuesDatabaseContractId?: string;
 
   /**
+   * The Contract ID of the Reverse Registrar contract.
+   */
+  // TODO: Add link to the documentation of the Reverse Registrar contract
+  reverseRegistrarContractId?: string;
+
+  /**
    * An instance of the rpc server you will connect to.
    */
   rpc: SorobanRpc.Server;

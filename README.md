@@ -12,13 +12,15 @@ The first step will be creating a new instance from the main class.
 
 ```typescript
 import * as SDK from '@stellar/stellar-sdk';
-import config from './myconfigfile.ts'
+import config from './myconfigfile.ts';
 
 const sdk: SorobanDomainsSDK = new SorobanDomainsSDK({
   stellarSDK: SDK,
   rpc: new SDK.SorobanRpc.Server(config.RPC_URL),
   network: config.NETWORK,
-  contractId: config.CONTRACT_ID,
+  vaultsContractId: config.VAULTS_CONTRACT_ID,
+  valuesDatabaseContractId: config.VALUES_DATABASE_CONTRACT_ID,
+  reverseRegistrarContractId: config.REVERSE_REGISTRAR_CONTRACT_ID,
   defaultFee: config.DEFAULT_FEE,
   defaultTimeout: config.DEFAULT_TIMEOUT,
   simulationAccount: config.SIMULATION_ACCOUNT,
@@ -40,6 +42,7 @@ When searching for a domain, you can receive two types of errors: an expected er
 Currently, there is only one expected error by the SDK: `Domain404Error`.
 
 If you need to catch this type of error you can do this:
+
 ```typescript
 import { Domain404Error } from '@creit.tech/sorobandomains-sdk';
 
@@ -56,9 +59,28 @@ try {
 
 > Note: In the example we check by the name and not if is an instance of the class because depending on your environment that validation method could fail.
 
+## Fetch the reverse domain of an address
 
+Before fetching the reverse domain of an address, you need to set `reverseRegistrarContractId` in the `SorobanDomainsSDK` constructor.
+
+```typescript
+import { ReverseDomain404Error } from '@creit.tech/sorobandomains-sdk';
+
+const address = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF';
+
+try {
+  const domain: string = await sdk.getReverseDomain(address);
+} catch (e) {
+  if (e.name === ReverseDomain404Error.name) {
+    // ... Do something here
+  } else {
+    // ... Do this instead
+  }
+}
+```
 
 ## License
+
 ![](https://img.shields.io/badge/License-MIT-lightgrey)
 
 Licensed under the MIT License, Copyright © 2024-present Creit Technologies LLP.

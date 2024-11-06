@@ -1,7 +1,7 @@
 import { Domain, DomainStorageValue, Record, RecordKey, RecordType, SorobanDomainsSDKParams, SubDomain } from './types';
 import { Hasher, keccak256 } from 'js-sha3';
 import { Buffer } from 'buffer';
-import { Domain404Error, DomainData404Error, DomainDataUnsupportedValueType } from './errors';
+import { Domain404Error, DomainData404Error, DomainDataUnsupportedValueType, ReverseDomain404Error } from './errors';
 import { Account, Contract, SorobanRpc, Transaction, xdr } from '@stellar/stellar-sdk';
 
 export class SorobanDomainsSDK {
@@ -225,5 +225,92 @@ export class SorobanDomainsSDK {
       tx: this.global.stellarSDK.SorobanRpc.assembleTransaction(transaction, sim).build(),
       sim,
     };
+  }
+
+  async setReverseDomain(params: { address: string; domain: string | null; source: string }): Promise<{
+    tx: Transaction;
+    sim: SorobanRpc.Api.SimulateTransactionRestoreResponse | SorobanRpc.Api.SimulateTransactionSuccessResponse;
+  }> {
+    if (!this.global.reverseRegistrarContractId) {
+      throw new Error(`Reverse Registrar contract id was not provided`);
+    }
+
+    const addressScval = this.global.stellarSDK.nativeToScVal(params.address, { type: 'address' });
+
+    let domainScval = this.global.stellarSDK.xdr.ScVal.scvVoid();
+    if (params.domain !== null) {
+      const parts = params.domain.split('.');
+      if (parts.length < 2) {
+        throw new Error('Invalid domain format');
+      }
+      const domainParts = {
+        tld: Buffer.from(parts[parts.length - 1]),
+        sld: Buffer.from(parts[parts.length - 2]),
+        subs: parts.slice(0, parts.length - 2).map(part => Buffer.from(part)),
+      };
+      domainScval = this.global.stellarSDK.nativeToScVal(domainParts, {
+        type: {
+          'tld': ['symbol'],
+          'sld': ['symbol'],
+          'subs': ['symbol']
+        }
+      });
+    }
+
+    const contract: Contract = new this.global.stellarSDK.Contract(this.global.reverseRegistrarContractId);
+    const account: Account = await this.global.rpc.getAccount(params.source);
+    const transaction: Transaction = new this.global.stellarSDK.TransactionBuilder(account, {
+      networkPassphrase: this.global.network,
+      fee: this.global.defaultFee,
+    })
+      .setTimeout(this.global.defaultTimeout || 0)
+      .addOperation(contract.call('set', addressScval, domainScval))
+      .build();
+
+    const sim: SorobanRpc.Api.SimulateTransactionResponse = await this.global.rpc.simulateTransaction(transaction);
+
+    if (this.global.stellarSDK.SorobanRpc.Api.isSimulationError(sim)) {
+      throw new Error(sim.error);
+    }
+
+    return {
+      tx: this.global.stellarSDK.SorobanRpc.assembleTransaction(transaction, sim).build(),
+      sim,
+    };
+  }
+
+  async getReverseDomain(address: string): Promise<string> {
+    if (!this.global.reverseRegistrarContractId) {
+      throw new Error(`Reverse Registrar contract id was not provided`);
+    }
+
+    const contract: Contract = new this.global.stellarSDK.Contract(this.global.reverseRegistrarContractId);
+    const addressScval: xdr.ScVal = this.global.stellarSDK.nativeToScVal(address, { type: 'address' });
+
+    const account: Account = await this.global.rpc.getAccount(this.global.simulationAccount);
+    const transaction: Transaction = new this.global.stellarSDK.TransactionBuilder(account, {
+      networkPassphrase: this.global.network,
+      fee: this.global.defaultFee,
+    })
+      .setTimeout(this.global.defaultTimeout || 0)
+      .addOperation(contract.call('get', addressScval))
+      .build();
+
+    const sim: SorobanRpc.Api.SimulateTransactionResponse = await this.global.rpc.simulateTransaction(transaction);
+
+    if (this.global.stellarSDK.SorobanRpc.Api.isSimulationError(sim)) {
+      throw new Error(sim.error);
+    }
+
+    const result = this.global.stellarSDK.scValToNative(sim.result!.retval);
+
+    if (!result) {
+      throw new ReverseDomain404Error();
+    }
+
+    const tld: string = result.tld.toString();
+    const sld: string = result.sld.toString();
+    const subs: string = result.subs.map((buf: Buffer) => buf.toString()).join('.');
+    return `${subs ? subs + '.' : ''}${sld}.${tld}`;
   }
 }

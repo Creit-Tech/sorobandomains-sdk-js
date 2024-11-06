@@ -227,6 +227,23 @@ export class SorobanDomainsSDK {
     };
   }
 
+  /**
+   * Sets or clears the reverse domain record for a Stellar address.
+   *
+   * @param params - The parameters for setting the reverse domain
+   * @param params.address - The Stellar address to set the reverse domain for
+   * @param params.domain - The domain name to set (e.g. "example.xlm"), or null to clear
+   * @param params.source - The source account address that will sign the transaction
+   *
+   * @returns Promise containing:
+   *   - tx: The built transaction
+   *   - sim: The simulation response from the Soroban RPC
+   *
+   * @throws Error if:
+   *   - Reverse Registrar contract ID is not configured
+   *   - Domain format is invalid (must have at least 2 parts)
+   *   - Simulation fails
+   */
   async setReverseDomain(params: { address: string; domain: string | null; source: string }): Promise<{
     tx: Transaction;
     sim: SorobanRpc.Api.SimulateTransactionRestoreResponse | SorobanRpc.Api.SimulateTransactionSuccessResponse;
@@ -250,10 +267,10 @@ export class SorobanDomainsSDK {
       };
       domainScval = this.global.stellarSDK.nativeToScVal(domainParts, {
         type: {
-          'tld': ['symbol'],
-          'sld': ['symbol'],
-          'subs': ['symbol']
-        }
+          tld: ['symbol'],
+          sld: ['symbol'],
+          subs: ['symbol'],
+        },
       });
     }
 
@@ -279,6 +296,18 @@ export class SorobanDomainsSDK {
     };
   }
 
+  /**
+   * Retrieves the reverse domain record for a Stellar address.
+   *
+   * @param address - The Stellar address to look up the reverse domain for
+   *
+   * @returns Promise<string> - The full domain name (e.g. "example.xlm")
+   *
+   * @throws Error if:
+   *   - Reverse Registrar contract ID is not configured
+   *   - Simulation fails
+   * @throws ReverseDomain404Error if no reverse domain is set for the address
+   */
   async getReverseDomain(address: string): Promise<string> {
     if (!this.global.reverseRegistrarContractId) {
       throw new Error(`Reverse Registrar contract id was not provided`);

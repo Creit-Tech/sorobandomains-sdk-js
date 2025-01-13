@@ -2,7 +2,7 @@ import {
   Contract,
   xdr,
   TransactionBuilder,
-  SorobanRpc,
+  rpc,
   Networks,
   scValToNative,
   nativeToScVal,
@@ -18,7 +18,7 @@ export interface SorobanDomainsSDKParams {
     Contract: typeof Contract;
     xdr: typeof xdr;
     TransactionBuilder: typeof TransactionBuilder;
-    SorobanRpc: typeof SorobanRpc;
+    rpc: typeof rpc;
     scValToNative: typeof scValToNative;
     nativeToScVal: typeof nativeToScVal;
   };
@@ -49,7 +49,7 @@ export interface SorobanDomainsSDKParams {
   /**
    * An instance of the rpc server you will connect to.
    */
-  rpc: SorobanRpc.Server;
+  rpc: rpc.Server;
 
   /**
    * The simulation account is just a simple stellar account

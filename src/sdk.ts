@@ -2,7 +2,7 @@ import { Domain, DomainStorageValue, Record, RecordKey, RecordType, SorobanDomai
 import { Hasher, keccak256 } from 'js-sha3';
 import { Buffer } from 'buffer';
 import { Domain404Error, DomainData404Error, DomainDataUnsupportedValueType, ReverseDomain404Error } from './errors';
-import { Account, Contract, SorobanRpc, Transaction, xdr } from '@stellar/stellar-sdk';
+import { Account, Contract, rpc as SorobanRpc, Transaction, xdr } from '@stellar/stellar-sdk';
 
 export class SorobanDomainsSDK {
   constructor(public global: SorobanDomainsSDKParams) {}

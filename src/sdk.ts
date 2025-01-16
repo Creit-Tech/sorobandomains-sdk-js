@@ -39,8 +39,8 @@ export class SorobanDomainsSDK {
     }
 
     const domainNode: string = SorobanDomainsSDK.parseDomain({
-      domain: params.domain,
-      subDomain: params.subDomain,
+      domain: params.domain.toLocaleLowerCase(),
+      subDomain: params.subDomain?.toLocaleLowerCase(),
     });
 
     const contract: Contract = new this.global.stellarSDK.Contract(this.global.vaultsContractId);
@@ -256,7 +256,7 @@ export class SorobanDomainsSDK {
 
     let domainScval = this.global.stellarSDK.xdr.ScVal.scvVoid();
     if (params.domain !== null) {
-      const parts = params.domain.split('.');
+      const parts = params.domain.toLocaleLowerCase().split('.');
       if (parts.length < 2) {
         throw new Error('Invalid domain format');
       }

@@ -21,7 +21,7 @@ describe.skip('Reverse Domain', () => {
   beforeEach(() => {
     sdk = new SorobanDomainsSDK({
       stellarSDK: SDK,
-      rpc: new SDK.SorobanRpc.Server('https://soroban-testnet.stellar.org'),
+      rpc: new SDK.rpc.Server('https://soroban-testnet.stellar.org'),
       network: SDK.Networks.TESTNET,
       reverseRegistrarContractId: 'CCZ5IJOVN6V6QH6THM67TEM4V32GE7DAYV6QJHIAEJ7SXYJ4RWZ7N3AV',
       defaultFee: '100000',

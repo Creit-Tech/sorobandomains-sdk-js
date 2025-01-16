@@ -16,7 +16,7 @@ import config from './myconfigfile.ts';
 
 const sdk: SorobanDomainsSDK = new SorobanDomainsSDK({
   stellarSDK: SDK,
-  rpc: new SDK.SorobanRpc.Server(config.RPC_URL),
+  rpc: new SDK.rpc.Server(config.RPC_URL),
   network: config.NETWORK,
   vaultsContractId: config.VAULTS_CONTRACT_ID,
   valuesDatabaseContractId: config.VALUES_DATABASE_CONTRACT_ID,

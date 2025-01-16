@@ -1,12 +1,4 @@
-import {
-  Contract,
-  xdr,
-  TransactionBuilder,
-  rpc as SorobanRpc,
-  Networks,
-  scValToNative,
-  nativeToScVal,
-} from '@stellar/stellar-sdk';
+import { Contract, xdr, TransactionBuilder, rpc, Networks, scValToNative, nativeToScVal } from '@stellar/stellar-sdk';
 
 export interface SorobanDomainsSDKParams {
   /**
@@ -18,7 +10,7 @@ export interface SorobanDomainsSDKParams {
     Contract: typeof Contract;
     xdr: typeof xdr;
     TransactionBuilder: typeof TransactionBuilder;
-    SorobanRpc: typeof SorobanRpc;
+    rpc: typeof rpc;
     scValToNative: typeof scValToNative;
     nativeToScVal: typeof nativeToScVal;
   };
@@ -49,7 +41,7 @@ export interface SorobanDomainsSDKParams {
   /**
    * An instance of the rpc server you will connect to.
    */
-  rpc: SorobanRpc.Server;
+  rpc: rpc.Server;
 
   /**
    * The simulation account is just a simple stellar account

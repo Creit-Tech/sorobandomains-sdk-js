@@ -2,7 +2,7 @@ import { Domain, DomainStorageValue, Record, RecordKey, RecordType, SorobanDomai
 import { Hasher, keccak256 } from 'js-sha3';
 import { Buffer } from 'buffer';
 import { Domain404Error, DomainData404Error, DomainDataUnsupportedValueType, ReverseDomain404Error } from './errors';
-import { Account, Contract, rpc as SorobanRpc, Transaction, xdr } from '@stellar/stellar-sdk';
+import { Account, Contract, rpc, Transaction, xdr } from '@stellar/stellar-sdk';
 
 export class SorobanDomainsSDK {
   constructor(public global: SorobanDomainsSDKParams) {}
@@ -61,9 +61,9 @@ export class SorobanDomainsSDK {
       .addOperation(contract.call('record', record_key))
       .build();
 
-    const sim: SorobanRpc.Api.SimulateTransactionResponse = await this.global.rpc.simulateTransaction(transaction);
+    const sim: rpc.Api.SimulateTransactionResponse = await this.global.rpc.simulateTransaction(transaction);
 
-    if (this.global.stellarSDK.SorobanRpc.Api.isSimulationError(sim)) {
+    if (this.global.stellarSDK.rpc.Api.isSimulationError(sim)) {
       throw new Error(sim.error);
     }
 
@@ -117,9 +117,9 @@ export class SorobanDomainsSDK {
       .addOperation(contract.call('get', nodeBytes, keySymbol))
       .build();
 
-    const sim: SorobanRpc.Api.SimulateTransactionResponse = await this.global.rpc.simulateTransaction(transaction);
+    const sim: rpc.Api.SimulateTransactionResponse = await this.global.rpc.simulateTransaction(transaction);
 
-    if (this.global.stellarSDK.SorobanRpc.Api.isSimulationError(sim)) {
+    if (this.global.stellarSDK.rpc.Api.isSimulationError(sim)) {
       throw new Error(sim.error);
     }
 
@@ -134,7 +134,7 @@ export class SorobanDomainsSDK {
 
   async setDomainData(params: { node: string; key: string; value: DomainStorageValue; source: string }): Promise<{
     tx: Transaction;
-    sim: SorobanRpc.Api.SimulateTransactionRestoreResponse | SorobanRpc.Api.SimulateTransactionSuccessResponse;
+    sim: rpc.Api.SimulateTransactionRestoreResponse | rpc.Api.SimulateTransactionSuccessResponse;
   }> {
     if (!this.global.valuesDatabaseContractId) {
       throw new Error(`KeyValue Database contract id was not provided`);
@@ -181,21 +181,21 @@ export class SorobanDomainsSDK {
       .addOperation(contract.call('set', nodeBytes, keySymbol, value))
       .build();
 
-    const sim: SorobanRpc.Api.SimulateTransactionResponse = await this.global.rpc.simulateTransaction(transaction);
+    const sim: rpc.Api.SimulateTransactionResponse = await this.global.rpc.simulateTransaction(transaction);
 
-    if (this.global.stellarSDK.SorobanRpc.Api.isSimulationError(sim)) {
+    if (this.global.stellarSDK.rpc.Api.isSimulationError(sim)) {
       throw new Error(sim.error);
     }
 
     return {
-      tx: this.global.stellarSDK.SorobanRpc.assembleTransaction(transaction, sim).build(),
+      tx: this.global.stellarSDK.rpc.assembleTransaction(transaction, sim).build(),
       sim,
     };
   }
 
   async removeDomainData(params: { node: string; key: string; source: string }): Promise<{
     tx: Transaction;
-    sim: SorobanRpc.Api.SimulateTransactionRestoreResponse | SorobanRpc.Api.SimulateTransactionSuccessResponse;
+    sim: rpc.Api.SimulateTransactionRestoreResponse | rpc.Api.SimulateTransactionSuccessResponse;
   }> {
     if (!this.global.valuesDatabaseContractId) {
       throw new Error(`KeyValue Database contract id was not provided`);
@@ -215,14 +215,14 @@ export class SorobanDomainsSDK {
       .addOperation(contract.call('remove', nodeBytes, keySymbol))
       .build();
 
-    const sim: SorobanRpc.Api.SimulateTransactionResponse = await this.global.rpc.simulateTransaction(transaction);
+    const sim: rpc.Api.SimulateTransactionResponse = await this.global.rpc.simulateTransaction(transaction);
 
-    if (this.global.stellarSDK.SorobanRpc.Api.isSimulationError(sim)) {
+    if (this.global.stellarSDK.rpc.Api.isSimulationError(sim)) {
       throw new Error(sim.error);
     }
 
     return {
-      tx: this.global.stellarSDK.SorobanRpc.assembleTransaction(transaction, sim).build(),
+      tx: this.global.stellarSDK.rpc.assembleTransaction(transaction, sim).build(),
       sim,
     };
   }
@@ -246,7 +246,7 @@ export class SorobanDomainsSDK {
    */
   async setReverseDomain(params: { address: string; domain: string | null; source: string }): Promise<{
     tx: Transaction;
-    sim: SorobanRpc.Api.SimulateTransactionRestoreResponse | SorobanRpc.Api.SimulateTransactionSuccessResponse;
+    sim: rpc.Api.SimulateTransactionRestoreResponse | rpc.Api.SimulateTransactionSuccessResponse;
   }> {
     if (!this.global.reverseRegistrarContractId) {
       throw new Error(`Reverse Registrar contract id was not provided`);
@@ -284,14 +284,14 @@ export class SorobanDomainsSDK {
       .addOperation(contract.call('set', addressScval, domainScval))
       .build();
 
-    const sim: SorobanRpc.Api.SimulateTransactionResponse = await this.global.rpc.simulateTransaction(transaction);
+    const sim: rpc.Api.SimulateTransactionResponse = await this.global.rpc.simulateTransaction(transaction);
 
-    if (this.global.stellarSDK.SorobanRpc.Api.isSimulationError(sim)) {
+    if (this.global.stellarSDK.rpc.Api.isSimulationError(sim)) {
       throw new Error(sim.error);
     }
 
     return {
-      tx: this.global.stellarSDK.SorobanRpc.assembleTransaction(transaction, sim).build(),
+      tx: this.global.stellarSDK.rpc.assembleTransaction(transaction, sim).build(),
       sim,
     };
   }
@@ -325,9 +325,9 @@ export class SorobanDomainsSDK {
       .addOperation(contract.call('get', addressScval))
       .build();
 
-    const sim: SorobanRpc.Api.SimulateTransactionResponse = await this.global.rpc.simulateTransaction(transaction);
+    const sim: rpc.Api.SimulateTransactionResponse = await this.global.rpc.simulateTransaction(transaction);
 
-    if (this.global.stellarSDK.SorobanRpc.Api.isSimulationError(sim)) {
+    if (this.global.stellarSDK.rpc.Api.isSimulationError(sim)) {
       throw new Error(sim.error);
     }
 

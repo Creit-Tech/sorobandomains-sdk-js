@@ -1,31 +1,46 @@
-import { Domain, DomainStorageValue, Record, RecordKey, RecordType, SorobanDomainsSDKParams, SubDomain } from './types';
-import { Hasher, keccak256 } from 'js-sha3';
-import { Buffer } from 'buffer';
-import { Domain404Error, DomainData404Error, DomainDataUnsupportedValueType, ReverseDomain404Error } from './errors';
-import { Account, Contract, rpc, Transaction, xdr } from '@stellar/stellar-sdk';
+import {
+  type Domain,
+  type DomainStorageValue,
+  type Record,
+  RecordKey,
+  RecordType,
+  type SorobanDomainsSDKParams,
+  type SubDomain,
+} from "./types.ts";
+import { crypto } from "@std/crypto";
+import { encodeHex } from "@std/encoding";
+import { concat } from "@std/bytes";
+import { Domain404Error, DomainData404Error, DomainDataUnsupportedValueType, ReverseDomain404Error } from "./errors.ts";
+import type { Account, Contract, rpc, Transaction, xdr } from "@stellar/stellar-sdk";
+import { decodeHex } from "@std/encoding/hex";
 
 export class SorobanDomainsSDK {
   constructor(public global: SorobanDomainsSDKParams) {}
+
+  static hash(text: string | Uint8Array): Uint8Array {
+    return new Uint8Array(
+      crypto.subtle.digestSync("KECCAK-256", typeof text === "string" ? new TextEncoder().encode(text) : text),
+    );
+  }
 
   /**
    * This function takes a domain and generates the "node" value of the parsed domain.
    * This "node" value can be used to fetch data from the contract (either if is a Record or a SubRecord)
    */
-  static parseDomain(params: { domain: string; subDomain?: string }): string {
-    const record: Hasher = keccak256
-      .create()
-      .update(keccak256.create().update('xlm').digest())
-      .update(keccak256.create().update(params.domain).digest());
+  static parseDomain(params: { domain: string; subDomain?: string; tld?: string }): string {
+    const node: Uint8Array = this.hash(concat([
+      this.hash(params.tld || "xlm"),
+      this.hash(params.domain),
+    ]));
 
     if (params.subDomain) {
-      const subRecord: Hasher = keccak256
-        .create()
-        .update(keccak256.create().update(record.digest()).digest())
-        .update(keccak256.create().update(params.subDomain).digest());
-
-      return subRecord.hex();
+      const subNode: Uint8Array = this.hash(concat([
+        this.hash(node),
+        this.hash(params.subDomain),
+      ]));
+      return encodeHex(subNode);
     } else {
-      return record.hex();
+      return encodeHex(node);
     }
   }
 
@@ -44,7 +59,7 @@ export class SorobanDomainsSDK {
     });
 
     const contract: Contract = new this.global.stellarSDK.Contract(this.global.vaultsContractId);
-    const nodeBytes: xdr.ScVal = this.global.stellarSDK.xdr.ScVal.scvBytes(Buffer.from(domainNode, 'hex'));
+    const nodeBytes: xdr.ScVal = this.global.stellarSDK.xdr.ScVal.scvBytes(decodeHex(domainNode));
 
     const record_key: xdr.ScVal = this.global.stellarSDK.xdr.ScVal.scvVec([
       this.global.stellarSDK.xdr.ScVal.scvSymbol(params.subDomain ? RecordKey.SubRecord : RecordKey.Record),
@@ -58,7 +73,7 @@ export class SorobanDomainsSDK {
       fee: this.global.defaultFee,
     })
       .setTimeout(this.global.defaultTimeout || 0)
-      .addOperation(contract.call('record', record_key))
+      .addOperation(contract.call("record", record_key))
       .build();
 
     const sim: rpc.Api.SimulateTransactionResponse = await this.global.rpc.simulateTransaction(transaction);
@@ -73,12 +88,12 @@ export class SorobanDomainsSDK {
       throw new Domain404Error();
     }
 
-    if (result[0] === 'Domain') {
+    if (result[0] === "Domain") {
       return {
         type: RecordType.Domain,
         value: {
-          node: result[1].node.toString('hex'),
-          owner: result[1].owner.toString('hex'),
+          node: result[1].node.toString("hex"),
+          owner: result[1].owner.toString("hex"),
           address: result[1].address,
           exp_date: result[1].exp_date.toString(),
           snapshot: result[1].snapshot.toString(),
@@ -89,8 +104,8 @@ export class SorobanDomainsSDK {
       return {
         type: RecordType.SubDomain,
         value: {
-          node: result[1].node.toString('hex'),
-          parent: result[1].parent.toString('hex'),
+          node: result[1].node.toString("hex"),
+          parent: result[1].parent.toString("hex"),
           address: result[1].address,
           snapshot: result[1].snapshot.toString(),
         } satisfies SubDomain,
@@ -104,7 +119,7 @@ export class SorobanDomainsSDK {
     }
 
     const contract: Contract = new this.global.stellarSDK.Contract(this.global.valuesDatabaseContractId);
-    const nodeBytes: xdr.ScVal = this.global.stellarSDK.xdr.ScVal.scvBytes(Buffer.from(params.node, 'hex'));
+    const nodeBytes: xdr.ScVal = this.global.stellarSDK.xdr.ScVal.scvBytes(decodeHex(params.node));
     const keySymbol: xdr.ScVal = this.global.stellarSDK.xdr.ScVal.scvSymbol(params.key);
 
     const account: Account = await this.global.rpc.getAccount(this.global.simulationAccount);
@@ -114,7 +129,7 @@ export class SorobanDomainsSDK {
       fee: this.global.defaultFee,
     })
       .setTimeout(this.global.defaultTimeout || 0)
-      .addOperation(contract.call('get', nodeBytes, keySymbol))
+      .addOperation(contract.call("get", nodeBytes, keySymbol))
       .build();
 
     const sim: rpc.Api.SimulateTransactionResponse = await this.global.rpc.simulateTransaction(transaction);
@@ -141,28 +156,28 @@ export class SorobanDomainsSDK {
     }
 
     const contract: Contract = new this.global.stellarSDK.Contract(this.global.valuesDatabaseContractId);
-    const nodeBytes: xdr.ScVal = this.global.stellarSDK.xdr.ScVal.scvBytes(Buffer.from(params.node, 'hex'));
+    const nodeBytes: xdr.ScVal = this.global.stellarSDK.xdr.ScVal.scvBytes(decodeHex(params.node));
     const keySymbol: xdr.ScVal = this.global.stellarSDK.xdr.ScVal.scvSymbol(params.key);
     let value: xdr.ScVal;
 
     switch (params.value[0]) {
-      case 'Bytes':
+      case "Bytes":
         value = this.global.stellarSDK.xdr.ScVal.scvVec([
-          this.global.stellarSDK.xdr.ScVal.scvSymbol('Bytes'),
+          this.global.stellarSDK.xdr.ScVal.scvSymbol("Bytes"),
           this.global.stellarSDK.xdr.ScVal.scvBytes(params.value[1]),
         ]);
         break;
 
-      case 'Number':
+      case "Number":
         value = this.global.stellarSDK.xdr.ScVal.scvVec([
-          this.global.stellarSDK.xdr.ScVal.scvSymbol('Number'),
-          this.global.stellarSDK.nativeToScVal(params.value[1], { type: 'i128' }),
+          this.global.stellarSDK.xdr.ScVal.scvSymbol("Number"),
+          this.global.stellarSDK.nativeToScVal(params.value[1], { type: "i128" }),
         ]);
         break;
 
-      case 'String':
+      case "String":
         value = this.global.stellarSDK.xdr.ScVal.scvVec([
-          this.global.stellarSDK.xdr.ScVal.scvSymbol('String'),
+          this.global.stellarSDK.xdr.ScVal.scvSymbol("String"),
           this.global.stellarSDK.xdr.ScVal.scvString(params.value[1]),
         ]);
         break;
@@ -178,7 +193,7 @@ export class SorobanDomainsSDK {
       fee: this.global.defaultFee,
     })
       .setTimeout(this.global.defaultTimeout || 0)
-      .addOperation(contract.call('set', nodeBytes, keySymbol, value))
+      .addOperation(contract.call("set", nodeBytes, keySymbol, value))
       .build();
 
     const sim: rpc.Api.SimulateTransactionResponse = await this.global.rpc.simulateTransaction(transaction);
@@ -202,7 +217,7 @@ export class SorobanDomainsSDK {
     }
 
     const contract: Contract = new this.global.stellarSDK.Contract(this.global.valuesDatabaseContractId);
-    const nodeBytes: xdr.ScVal = this.global.stellarSDK.xdr.ScVal.scvBytes(Buffer.from(params.node, 'hex'));
+    const nodeBytes: xdr.ScVal = this.global.stellarSDK.xdr.ScVal.scvBytes(decodeHex(params.node));
     const keySymbol: xdr.ScVal = this.global.stellarSDK.xdr.ScVal.scvSymbol(params.key);
 
     const account: Account = await this.global.rpc.getAccount(params.source);
@@ -212,7 +227,7 @@ export class SorobanDomainsSDK {
       fee: this.global.defaultFee,
     })
       .setTimeout(this.global.defaultTimeout || 0)
-      .addOperation(contract.call('remove', nodeBytes, keySymbol))
+      .addOperation(contract.call("remove", nodeBytes, keySymbol))
       .build();
 
     const sim: rpc.Api.SimulateTransactionResponse = await this.global.rpc.simulateTransaction(transaction);
@@ -252,24 +267,24 @@ export class SorobanDomainsSDK {
       throw new Error(`Reverse Registrar contract id was not provided`);
     }
 
-    const addressScval = this.global.stellarSDK.nativeToScVal(params.address, { type: 'address' });
+    const addressScval = this.global.stellarSDK.nativeToScVal(params.address, { type: "address" });
 
     let domainScval = this.global.stellarSDK.xdr.ScVal.scvVoid();
     if (params.domain !== null) {
-      const parts = params.domain.toLocaleLowerCase().split('.');
+      const parts = params.domain.toLocaleLowerCase().split(".");
       if (parts.length < 2) {
-        throw new Error('Invalid domain format');
+        throw new Error("Invalid domain format");
       }
       const domainParts = {
-        tld: Buffer.from(parts[parts.length - 1]),
-        sld: Buffer.from(parts[parts.length - 2]),
-        subs: parts.slice(0, parts.length - 2).map(part => Buffer.from(part)),
+        tld: new TextEncoder().encode(parts[parts.length - 1]),
+        sld: new TextEncoder().encode(parts[parts.length - 2]),
+        subs: parts.slice(0, parts.length - 2).map((part) => new TextEncoder().encode(part)),
       };
       domainScval = this.global.stellarSDK.nativeToScVal(domainParts, {
         type: {
-          tld: ['symbol'],
-          sld: ['symbol'],
-          subs: ['symbol'],
+          tld: ["symbol"],
+          sld: ["symbol"],
+          subs: ["symbol"],
         },
       });
     }
@@ -281,7 +296,7 @@ export class SorobanDomainsSDK {
       fee: this.global.defaultFee,
     })
       .setTimeout(this.global.defaultTimeout || 0)
-      .addOperation(contract.call('set', addressScval, domainScval))
+      .addOperation(contract.call("set", addressScval, domainScval))
       .build();
 
     const sim: rpc.Api.SimulateTransactionResponse = await this.global.rpc.simulateTransaction(transaction);
@@ -314,7 +329,7 @@ export class SorobanDomainsSDK {
     }
 
     const contract: Contract = new this.global.stellarSDK.Contract(this.global.reverseRegistrarContractId);
-    const addressScval: xdr.ScVal = this.global.stellarSDK.nativeToScVal(address, { type: 'address' });
+    const addressScval: xdr.ScVal = this.global.stellarSDK.nativeToScVal(address, { type: "address" });
 
     const account: Account = await this.global.rpc.getAccount(this.global.simulationAccount);
     const transaction: Transaction = new this.global.stellarSDK.TransactionBuilder(account, {
@@ -322,7 +337,7 @@ export class SorobanDomainsSDK {
       fee: this.global.defaultFee,
     })
       .setTimeout(this.global.defaultTimeout || 0)
-      .addOperation(contract.call('get', addressScval))
+      .addOperation(contract.call("get", addressScval))
       .build();
 
     const sim: rpc.Api.SimulateTransactionResponse = await this.global.rpc.simulateTransaction(transaction);
@@ -339,7 +354,7 @@ export class SorobanDomainsSDK {
 
     const tld: string = result.tld.toString();
     const sld: string = result.sld.toString();
-    const subs: string = result.subs.map((buf: Buffer) => buf.toString()).join('.');
-    return `${subs ? subs + '.' : ''}${sld}.${tld}`;
+    const subs: string = result.subs.map((buf: ArrayBuffer) => buf.toString()).join(".");
+    return `${subs ? subs + "." : ""}${sld}.${tld}`;
   }
 }

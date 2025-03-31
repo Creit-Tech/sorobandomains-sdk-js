@@ -1,4 +1,12 @@
-import { Contract, xdr, TransactionBuilder, rpc, Networks, scValToNative, nativeToScVal } from '@stellar/stellar-sdk';
+import type {
+  Contract,
+  nativeToScVal,
+  Networks,
+  rpc,
+  scValToNative,
+  TransactionBuilder,
+  xdr,
+} from "@stellar/stellar-sdk";
 
 export interface SorobanDomainsSDKParams {
   /**
@@ -107,21 +115,21 @@ export interface SubDomain {
 }
 
 export enum RecordKey {
-  Record = 'Record',
-  SubRecord = 'SubRecord',
+  Record = "Record",
+  SubRecord = "SubRecord",
 }
 
 export enum RecordType {
-  Domain = 'Domain',
-  SubDomain = 'SubDomain',
+  Domain = "Domain",
+  SubDomain = "SubDomain",
 }
 export type Record = { type: RecordType.Domain; value: Domain } | { type: RecordType.SubDomain; value: SubDomain };
 
-export type DomainStorageValue = ['String', string] | ['Bytes', Buffer] | ['Number', bigint];
+export type DomainStorageValue = ["String", string] | ["Bytes", ArrayBufferLike] | ["Number", bigint];
 export enum DefaultStorageKeys {
-  TOML = 'TOML',
-  TOML_HASH = 'TOML_HASH',
-  WEBSITE = 'WEBSITE',
-  WEBSITE_IPFS = 'WEBSITE_IPFS',
-  WEBSITE_IPNS = 'WEBSITE_IPNS',
+  TOML = "TOML",
+  TOML_HASH = "TOML_HASH",
+  WEBSITE = "WEBSITE",
+  WEBSITE_IPFS = "WEBSITE_IPFS",
+  WEBSITE_IPNS = "WEBSITE_IPNS",
 }

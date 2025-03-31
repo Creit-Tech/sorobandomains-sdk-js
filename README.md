@@ -1,4 +1,5 @@
-An SDK to search registered domains in the Registry Smart Contract from the [SorobanDomains](https://sorobandomains.org) protocol
+An SDK to search registered domains in the Registry Smart Contract from the [SorobanDomains](https://sorobandomains.org)
+protocol
 
 ## Installation
 
@@ -11,8 +12,8 @@ npm i @creit.tech/sorobandomains-sdk
 The first step will be creating a new instance from the main class.
 
 ```typescript
-import * as SDK from '@stellar/stellar-sdk';
-import config from './myconfigfile.ts';
+import * as SDK from "@stellar/stellar-sdk";
+import config from "./myconfigfile.ts";
 
 const sdk: SorobanDomainsSDK = new SorobanDomainsSDK({
   stellarSDK: SDK,
@@ -27,15 +28,16 @@ const sdk: SorobanDomainsSDK = new SorobanDomainsSDK({
 });
 ```
 
-> If you want to know what each value represents, check the `SorobanDomainsSDKParams` interface in the `./src/types.ts` file.
+> If you want to know what each value represents, check the `SorobanDomainsSDKParams` interface in the `./src/types.ts`
+> file.
 
 ## Fetch a registered domain
 
 ```typescript
-import { Record } from '@creit.tech/sorobandomains-sdk';
+import { Record } from "@creit.tech/sorobandomains-sdk";
 
-const domainRecord: Record = await sdk.searchDomain({ domain: 'jhon' });
-const subDomainRecord: Record = await sdk.searchDomain({ domain: 'jhon', subDomain: 'payments' });
+const domainRecord: Record = await sdk.searchDomain({ domain: "jhon" });
+const subDomainRecord: Record = await sdk.searchDomain({ domain: "jhon", subDomain: "payments" });
 ```
 
 When searching for a domain, you can receive two types of errors: an expected error by the SDK or a simulation error.
@@ -44,10 +46,10 @@ Currently, there is only one expected error by the SDK: `Domain404Error`.
 If you need to catch this type of error you can do this:
 
 ```typescript
-import { Domain404Error } from '@creit.tech/sorobandomains-sdk';
+import { Domain404Error } from "@creit.tech/sorobandomains-sdk";
 
 try {
-  const domainRecord: Record = await sdk.searchDomain({ domain: 'nonexistingrecord' });
+  const domainRecord: Record = await sdk.searchDomain({ domain: "nonexistingrecord" });
 } catch (e) {
   if (e.name === Domain404Error.name) {
     // ... Do something here
@@ -57,16 +59,18 @@ try {
 }
 ```
 
-> Note: In the example we check by the name and not if is an instance of the class because depending on your environment that validation method could fail.
+> Note: In the example we check by the name and not if is an instance of the class because depending on your environment
+> that validation method could fail.
 
 ## Fetch the reverse domain of an address
 
-Before fetching the reverse domain of an address, you need to set `reverseRegistrarContractId` in the `SorobanDomainsSDK` constructor.
+Before fetching the reverse domain of an address, you need to set `reverseRegistrarContractId` in the
+`SorobanDomainsSDK` constructor.
 
 ```typescript
-import { ReverseDomain404Error } from '@creit.tech/sorobandomains-sdk';
+import { ReverseDomain404Error } from "@creit.tech/sorobandomains-sdk";
 
-const address = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF';
+const address = "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF";
 
 try {
   const domain: string = await sdk.getReverseDomain(address);

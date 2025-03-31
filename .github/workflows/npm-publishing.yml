@@ -1,24 +1,19 @@
-name: Publish Package to npm
+name: Publish
 on:
   release:
     types:
       - published
 
 jobs:
-  build_and_deploy:
+  publish:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '20.11.0'
-          registry-url: 'https://registry.npmjs.org'
-
-      - run: npm -g i pnpm && pnpm i
-
-      - run: pnpm run build
-
-      - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish package
+        run: npx jsr publish

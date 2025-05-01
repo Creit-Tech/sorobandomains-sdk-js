@@ -4,8 +4,9 @@ protocol
 ## Installation
 
 ```shell
-npm i @creit.tech/sorobandomains-sdk
+npx jsr add @creit-tech/sorobandomains-sdk
 ```
+> If you are using another tool like Deno, Bun or PNPM; check the installation instructions [here](https://jsr.io/@creit-tech/sorobandomains-sdk). 
 
 ## The SorobanDomainsSDK class
 

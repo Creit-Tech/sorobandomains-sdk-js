@@ -21,4 +21,17 @@ describe("Basic logic", (): void => {
     const generatedSubNode: string = SorobanDomainsSDK.parseDomain({ domain: "stellar", subDomain: "payments" });
     assertEquals(expectedSubNode, generatedSubNode);
   });
+
+  test("It should validate domains correctly", (): void => {
+    assertEquals(true, SorobanDomainsSDK.isValidDomain('stellar.xlm'));
+    assertEquals(true, SorobanDomainsSDK.isValidDomain('dev.stellar.xlm'));
+    assertEquals(false, SorobanDomainsSDK.isValidDomain('another.dev.stellar.xlm'));
+    assertEquals(false, SorobanDomainsSDK.isValidDomain('stellar'));
+    assertEquals(false, SorobanDomainsSDK.isValidDomain('stellar..xlm'));
+    assertEquals(false, SorobanDomainsSDK.isValidDomain(' stellar.xlm'));
+    assertEquals(false, SorobanDomainsSDK.isValidDomain('qwertyuiopasdfghjklzxcvbnm.xlm'));
+    assertEquals(false, SorobanDomainsSDK.isValidDomain('hello-world.xlm'));
+    assertEquals(false, SorobanDomainsSDK.isValidDomain('steLLar.xlm'));
+    assertEquals(false, SorobanDomainsSDK.isValidDomain('ste11ar.xlm'));
+  });
 });

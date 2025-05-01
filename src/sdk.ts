@@ -45,6 +45,20 @@ export class SorobanDomainsSDK {
   }
 
   /**
+   * This method validates a domain string follow certain criteria required by the registry contract.
+   * NOTE: It does not validate wrong TLDs
+   *
+   * @param domain {String} - The domain to validate, for example: stellar.xlm
+   */
+  static isValidDomain(domain: string): boolean {
+    const domainRegex: RegExp = new RegExp('^[a-z]+(\\.[a-z]+)*\\.[a-z]{2,}$');
+    if (!domainRegex.test(domain)) return false;
+    const parts: string[] = domain.split('.');
+    if (parts.length > 3) return false;
+    return parts.every((part: string): boolean => part.length <= 15);
+  }
+
+  /**
    * This function parses the domain you want to use, and it will search it in the contract.
    * This function doesn't validate the domain you're providing is a valid one.
    */

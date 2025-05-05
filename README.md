@@ -6,7 +6,9 @@ protocol
 ```shell
 npx jsr add @creit-tech/sorobandomains-sdk
 ```
-> If you are using another tool like Deno, Bun or PNPM; check the installation instructions [here](https://jsr.io/@creit-tech/sorobandomains-sdk). 
+
+> If you are using another tool like Deno, Bun or PNPM; check the installation instructions
+> [here](https://jsr.io/@creit-tech/sorobandomains-sdk).
 
 ## The SorobanDomainsSDK class
 
@@ -16,21 +18,11 @@ The first step will be creating a new instance from the main class.
 import * as SDK from "@stellar/stellar-sdk";
 import config from "./myconfigfile.ts";
 
-const sdk: SorobanDomainsSDK = new SorobanDomainsSDK({
-  stellarSDK: SDK,
-  rpc: new SDK.rpc.Server(config.RPC_URL),
-  network: config.NETWORK,
-  vaultsContractId: config.VAULTS_CONTRACT_ID,
-  valuesDatabaseContractId: config.VALUES_DATABASE_CONTRACT_ID,
-  reverseRegistrarContractId: config.REVERSE_REGISTRAR_CONTRACT_ID,
-  defaultFee: config.DEFAULT_FEE,
-  defaultTimeout: config.DEFAULT_TIMEOUT,
-  simulationAccount: config.SIMULATION_ACCOUNT,
-});
+const sdk: SorobanDomainsSDK = new SorobanDomainsSDK({ rpcUrl: config.RPC_URL });
 ```
 
-> If you want to know what each value represents, check the `SorobanDomainsSDKParams` interface in the `./src/types.ts`
-> file.
+> There are more parameters you can provide to the SDK, check the `SorobanDomainsSDKParams` interface in the
+> [src/types.ts](https://github.com/Creit-Tech/sorobandomains-sdk-js/blob/main/src/types.ts) file to know all of them.
 
 ## Fetch a registered domain
 

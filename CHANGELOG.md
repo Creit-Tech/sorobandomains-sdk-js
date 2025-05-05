@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file. See
 [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.0] (2025-05-01)
+
+### Change
+
+- Remove the `stellarSDK` and the `rpc` instance so we start using the Stellar SDK directly now that recent versions
+  don't fail like old ones with the "instance of" logic.
+- Make as many constructor params as optional as possible, if they are not provided just use default values
+- Avoid fetching the account in read only methods so calls are faster
+
 ### [0.3.0] (2025-05-01)
 
 ### Add

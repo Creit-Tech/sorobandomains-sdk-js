@@ -1,44 +1,36 @@
-import type {
-  Contract,
-  nativeToScVal,
-  Networks,
-  rpc,
-  scValToNative,
-  TransactionBuilder,
-  xdr,
-} from "@stellar/stellar-sdk";
+import type { Networks } from "@stellar/stellar-sdk";
+
+export const SIMULATION_ACCOUNT: string = "GALAXYVOIDAOPZTDLHILAJQKCVVFMD4IKLXLSZV5YHO7VY74IWZILUTO";
+
+export enum RegistryContract {
+  v0 = "CATRNPHYKNXAPNLHEYH55REB6YSAJLGCPA4YM6L3WUKSZOPI77M2UMKI",
+}
+
+export enum KeyValueDbContract {
+  v0 = "CDH2T2CBGFPFNVRWFK4XJIRP6VOWSVTSDCRBCJ2TEIO22GADQP6RG3Y6",
+}
+
+export enum ReverseRegistrarContract {
+  v0 = "CCAU556HKCUXF4LBPUV2KROU5FYGC6227G2LD3SVQ6GR6654IVTO2GBO",
+}
 
 export interface SorobanDomainsSDKParams {
   /**
-   * These are all from the Stellar SDK, import them and pass them to the object.
-   * This is done this way because the `@stellar/stellar-sdk` package and its dependencies rely a lot on `instance of` logic,
-   * that means that we need to use the same objects everytime we can so we avoid issues in those conditions.
+   * A URL of the RPC to use, this value is required for methods that need to connect with the network
    */
-  stellarSDK: {
-    Contract: typeof Contract;
-    xdr: typeof xdr;
-    TransactionBuilder: typeof TransactionBuilder;
-    rpc: typeof rpc;
-    scValToNative: typeof scValToNative;
-    nativeToScVal: typeof nativeToScVal;
-  };
+  rpcUrl?: string;
 
   /**
-   * @deprecated use `vaultsContractId` instead, this will be removed in the future.
-   */
-  contractId?: string;
-
-  /**
-   * The Vaults contract ID of the protocol you want to connect to.
+   * The registry contract ID of the protocol you want to connect to.
    * Check the current ids here: https://www.sorobandomains.org/docs/apps_and_contracts
    */
-  vaultsContractId?: string;
+  registryContractId?: string;
 
   /**
-   * The Contract ID of the Key-Value storage contract.
+   * The Contract ID of the Key-Value database contract.
    * Check the current ids here: https://www.sorobandomains.org/docs/apps_and_contracts
    */
-  valuesDatabaseContractId?: string;
+  keyValuesDatabaseContractId?: string;
 
   /**
    * The Contract ID of the Reverse Registrar contract.
@@ -47,26 +39,21 @@ export interface SorobanDomainsSDKParams {
   reverseRegistrarContractId?: string;
 
   /**
-   * An instance of the rpc server you will connect to.
-   */
-  rpc: rpc.Server;
-
-  /**
    * The simulation account is just a simple stellar account
    * The account needs to be funded, but it doesn't matter if you have or not the secret key of this account
    */
-  simulationAccount: string;
+  simulationAccount?: string;
 
   /**
    * The network passphrase the RPC is using
    */
-  network: Networks;
+  network?: Networks;
 
   /**
    * The default fee you want to use when building transactions
    * NOTE: This is not really being used at the moment, is here just for future usage
    */
-  defaultFee: string;
+  defaultFee?: string;
 
   /**
    * The default timeout you want to use when building transactions

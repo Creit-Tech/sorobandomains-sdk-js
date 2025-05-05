@@ -1,6 +1,6 @@
 {
   "name": "@creit-tech/sorobandomains-sdk",
-  "version": "0.3.0",
+  "version": "0.5.0",
   "description": "An SDK to easily fetch domains from the sorobandomains.org protocol",
   "license": "MIT",
   "author": {
@@ -12,7 +12,8 @@
     "url": "https://github.com/Creit-Tech/sorobandomains-sdk-js.git"
   },
   "tasks": {
-    "dev": "deno run --watch main.ts"
+    "dev": "deno run --watch main.ts",
+    "test": "deno test --allow-net"
   },
   "fmt": {
     "lineWidth": 120

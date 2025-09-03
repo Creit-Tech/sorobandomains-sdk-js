@@ -1,6 +1,6 @@
 {
   "name": "@creit-tech/sorobandomains-sdk",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "An SDK to easily fetch domains from the sorobandomains.org protocol",
   "license": "MIT",
   "author": {
@@ -24,7 +24,7 @@
     "@std/crypto": "jsr:@std/crypto@^1.0.4",
     "@std/encoding": "jsr:@std/encoding@^1.0.8",
     "@std/testing": "jsr:@std/testing@^1.0.10",
-    "@stellar/stellar-sdk": "npm:@stellar/stellar-sdk@^13.1.0"
+    "@stellar/stellar-sdk": "npm:@stellar/stellar-sdk@^14.1.1"
   },
   "exports": "./src/mod.ts",
   "exclude": [

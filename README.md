@@ -15,10 +15,7 @@ npx jsr add @creit-tech/sorobandomains-sdk
 The first step will be creating a new instance from the main class.
 
 ```typescript
-import * as SDK from "@stellar/stellar-sdk";
-import config from "./myconfigfile.ts";
-
-const sdk: SorobanDomainsSDK = new SorobanDomainsSDK({ rpcUrl: config.RPC_URL });
+const sdk: SorobanDomainsSDK = new SorobanDomainsSDK();
 ```
 
 > There are more parameters you can provide to the SDK, check the `SorobanDomainsSDKParams` interface in the
@@ -27,33 +24,16 @@ const sdk: SorobanDomainsSDK = new SorobanDomainsSDK({ rpcUrl: config.RPC_URL })
 ## Fetch a registered domain
 
 ```typescript
-import { Record } from "@creit.tech/sorobandomains-sdk";
+import { Domain, SubDomain } from "@creit.tech/sorobandomains-sdk";
 
-const domainRecord: Record = await sdk.searchDomain({ domain: "jhon" });
-const subDomainRecord: Record = await sdk.searchDomain({ domain: "jhon", subDomain: "payments" });
+const domainRecord: Domain = await sdk.searchDomain("jhon.xlm");
+const subDomainRecord: SubDomain = await sdk.searchDomain("payments.jhon.xlm");
 ```
 
-When searching for a domain, you can receive two types of errors: an expected error by the SDK or a simulation error.
-Currently, there is only one expected error by the SDK: `Domain404Error`.
+This method will fail in two cases:
 
-If you need to catch this type of error you can do this:
-
-```typescript
-import { Domain404Error } from "@creit.tech/sorobandomains-sdk";
-
-try {
-  const domainRecord: Record = await sdk.searchDomain({ domain: "nonexistingrecord" });
-} catch (e) {
-  if (e.name === Domain404Error.name) {
-    // ... Do something here
-  } else {
-    // ... Do this instead
-  }
-}
-```
-
-> Note: In the example we check by the name and not if is an instance of the class because depending on your environment
-> that validation method could fail.
+- The domain doesn't exist
+- The domain is expired.
 
 ## Fetch the reverse domain of an address
 
@@ -80,6 +60,6 @@ try {
 
 ![](https://img.shields.io/badge/License-MIT-lightgrey)
 
-Licensed under the MIT License, Copyright © 2024-present Creit Technologies LLP.
+Licensed under the MIT License, Copyright © 2026-present Creit Tech.
 
 Checkout the `LICENSE.md` file for more details.

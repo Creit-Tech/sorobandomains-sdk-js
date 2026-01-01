@@ -1,7 +1,7 @@
 {
   "name": "@creit-tech/sorobandomains-sdk",
-  "version": "0.6.0",
-  "description": "An SDK to easily fetch domains from the sorobandomains.org protocol",
+  "version": "1.0.0",
+  "description": "An SDK to easily fetch and interact with domains from the sorobandomains.org protocol",
   "license": "MIT",
   "author": {
     "name": "Creit Technologies LLP",
@@ -10,10 +10,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/Creit-Tech/sorobandomains-sdk-js.git"
-  },
-  "tasks": {
-    "dev": "deno run --watch main.ts",
-    "test": "deno test --allow-net"
   },
   "fmt": {
     "lineWidth": 120
@@ -24,9 +20,13 @@
     "@std/crypto": "jsr:@std/crypto@^1.0.4",
     "@std/encoding": "jsr:@std/encoding@^1.0.8",
     "@std/testing": "jsr:@std/testing@^1.0.10",
-    "@stellar/stellar-sdk": "npm:@stellar/stellar-sdk@^14.1.1"
+    "@stellar/stellar-sdk": "npm:@stellar/stellar-sdk@^14.1.1",
+    "buffer": "npm:buffer@^6.0.3"
   },
-  "exports": "./src/mod.ts",
+  "exports": {
+    ".": "./src/mod.ts",
+    "./apis": "./src/apis/mod.ts"
+  },
   "exclude": [
     ".idea",
     ".github"

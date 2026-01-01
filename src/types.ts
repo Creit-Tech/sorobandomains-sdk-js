@@ -1,24 +1,16 @@
 import type { Networks } from "@stellar/stellar-sdk";
 
 export const SIMULATION_ACCOUNT: string = "GALAXYVOIDAOPZTDLHILAJQKCVVFMD4IKLXLSZV5YHO7VY74IWZILUTO";
-
-export enum RegistryContract {
-  v0 = "CATRNPHYKNXAPNLHEYH55REB6YSAJLGCPA4YM6L3WUKSZOPI77M2UMKI",
-}
-
-export enum KeyValueDbContract {
-  v0 = "CDH2T2CBGFPFNVRWFK4XJIRP6VOWSVTSDCRBCJ2TEIO22GADQP6RG3Y6",
-}
-
-export enum ReverseRegistrarContract {
-  v0 = "CCAU556HKCUXF4LBPUV2KROU5FYGC6227G2LD3SVQ6GR6654IVTO2GBO",
-}
+export const REGISTRY_CONTRACT: string = "CC75Z72OCE667WVPQOROIWDAGBOXFNJ4VQONQEURL74EYIDLWA4F7FEN";
+export const KEY_VALUE_DB_CONTRACT: string = "CDH2T2CBGFPFNVRWFK4XJIRP6VOWSVTSDCRBCJ2TEIO22GADQP6RG3Y6";
+export const REVERSE_REGISTRAR_CONTRACT: string = "CCAU556HKCUXF4LBPUV2KROU5FYGC6227G2LD3SVQ6GR6654IVTO2GBO";
 
 export interface SorobanDomainsSDKParams {
   /**
    * A URL of the RPC to use, this value is required for methods that need to connect with the network
    */
   rpcUrl?: string;
+  allowHttp?: boolean;
 
   /**
    * The registry contract ID of the protocol you want to connect to.
@@ -63,23 +55,17 @@ export interface SorobanDomainsSDKParams {
 }
 
 export interface Domain {
+  domain: string;
+  tld: string;
+
   // The `node` is the hash of the domain following the logic used by the function `generate_domain_node`
   node: string;
 
-  // The owner of the node above and the address who can make updates
-  owner: string;
+  // This is the ID of the NFD token that represents the ownership of this domain
+  token_id: number;
 
   // The address is where the node resolves to
   address: string;
-
-  // The TTL is the end expiration date of the domain.
-  // A domain that have been expired for at least 30 days can be claimed by another address
-  exp_date: string;
-
-  // The collateral is the amount of reserves the owner of the domain has deposited
-  // For example; if the `node_rate` is 1 unit of collateral and the min ttl is a year then the collateral amount is:
-  // 1 * (3600 * 24 * 365) = 3.1536000 XLM
-  collateral: string;
 
   // The snapshot is a value used as a flag for checking if other records are valid
   // The snapshot is the timestamp it was created
@@ -87,6 +73,9 @@ export interface Domain {
 }
 
 export interface SubDomain {
+  // This is the subdomain value
+  domain: string;
+
   // The node is the hash of the subdomain
   node: string;
 
@@ -96,23 +85,21 @@ export interface SubDomain {
   // The address is where the node resolves to
   address: string;
 
+  // The node hash of the root domain
+  root: string;
+
   // The snapshot is taken from the parent domain
   // If the subdomain snapshot is different from the parent one, it means the subdomain is invalid
   snapshot: string;
 }
 
 export enum RecordKey {
-  Record = "Record",
-  SubRecord = "SubRecord",
-}
-
-export enum RecordType {
   Domain = "Domain",
   SubDomain = "SubDomain",
 }
-export type Record = { type: RecordType.Domain; value: Domain } | { type: RecordType.SubDomain; value: SubDomain };
 
 export type DomainStorageValue = ["String", string] | ["Bytes", ArrayBufferLike] | ["Number", bigint];
+
 export enum DefaultStorageKeys {
   TOML = "TOML",
   TOML_HASH = "TOML_HASH",

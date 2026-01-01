@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file. See
 [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.0] (2026-01-01)
+
+This is a full upgrade and it's not compatible with the Registry V1.
+
+### Change
+
+- Full migration of the SDK to work with the new Registry V2
+- The `parseDomain` method has been replaced by `generateNode`
+
 ### [0.6.0] (2025-09-03)
 
 ### Change

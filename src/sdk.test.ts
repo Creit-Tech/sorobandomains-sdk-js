@@ -1,8 +1,8 @@
 import { SorobanDomainsSDK } from "./sdk.ts";
 import { describe, test } from "@std/testing/bdd";
 import { assertEquals } from "@std/assert";
-import { decodeHex } from "@std/encoding";
-import { type Record, RecordType } from "./types.ts";
+import type { Domain, SubDomain } from "./types.ts";
+import { decodeHex, encodeHex } from "@std/encoding/hex";
 
 describe("Basic logic", (): void => {
   test("The `hash` function", () => {
@@ -15,18 +15,18 @@ describe("Basic logic", (): void => {
 
   test("It should generate the correct domain node", (): void => {
     const expectedNode: string = "2fe4cc6a15f9466bad71ed407a8f1b7da81efd931e7712753152aa17abc0e06e";
-    const generatedNode: string = SorobanDomainsSDK.parseDomain({ domain: "stellar" });
-    assertEquals(expectedNode, generatedNode);
+    const generatedNode: Uint8Array = SorobanDomainsSDK.generateNode(["stellar"], "xlm");
+    assertEquals(expectedNode, encodeHex(generatedNode));
 
     const expectedSubNode: string = "c5e4e1b82ef754efdad5c3ce2f1ed0eb7d640076e1674aebc6b9419fe11b2e7a";
-    const generatedSubNode: string = SorobanDomainsSDK.parseDomain({ domain: "stellar", subDomain: "payments" });
-    assertEquals(expectedSubNode, generatedSubNode);
+    const generatedSubNode: Uint8Array = SorobanDomainsSDK.generateNode(["stellar", "payments"], "xlm");
+    assertEquals(expectedSubNode, encodeHex(generatedSubNode));
   });
 
   test("It should validate domains correctly", (): void => {
     assertEquals(true, SorobanDomainsSDK.isValidDomain("stellar.xlm"));
     assertEquals(true, SorobanDomainsSDK.isValidDomain("dev.stellar.xlm"));
-    assertEquals(false, SorobanDomainsSDK.isValidDomain("another.dev.stellar.xlm"));
+    assertEquals(true, SorobanDomainsSDK.isValidDomain("another.dev.stellar.xlm"));
     assertEquals(false, SorobanDomainsSDK.isValidDomain("stellar"));
     assertEquals(false, SorobanDomainsSDK.isValidDomain("stellar..xlm"));
     assertEquals(false, SorobanDomainsSDK.isValidDomain(" stellar.xlm"));
@@ -40,9 +40,15 @@ describe("Basic logic", (): void => {
 describe("Connection with public registry", () => {
   test("Search an existing domain", async () => {
     const now: number = performance.now();
-    const sdk: SorobanDomainsSDK = new SorobanDomainsSDK({ rpcUrl: "https://mainnet.sorobanrpc.com" });
-    const domain: Record = await sdk.searchDomain({ domain: "tomer" });
-    assertEquals(domain.type, RecordType.Domain);
+    const sdk: SorobanDomainsSDK = new SorobanDomainsSDK();
+    const [domain, subDomain] = await Promise.all([
+      sdk.searchDomain<Domain>("sorobandomains.xlm"),
+      sdk.searchDomain<SubDomain>("registry.sorobandomains.xlm"),
+    ]);
+    assertEquals(domain.domain, "sorobandomains");
+    assertEquals(domain.tld, "xlm");
+    assertEquals(subDomain.domain, "registry");
+    assertEquals(subDomain.parent, domain.node);
     const then: number = performance.now();
 
     console.log(`${(then - now).toFixed(2)}ms`);

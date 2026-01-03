@@ -1,6 +1,6 @@
 {
   "name": "@creit-tech/sorobandomains-sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "An SDK to easily fetch and interact with domains from the sorobandomains.org protocol",
   "license": "MIT",
   "author": {
@@ -15,6 +15,7 @@
     "lineWidth": 120
   },
   "imports": {
+    "@creit-tech/stellar-assets-sdk": "jsr:@creit-tech/stellar-assets-sdk@^0.3.4",
     "@std/assert": "jsr:@std/assert@1",
     "@std/bytes": "jsr:@std/bytes@^1.0.5",
     "@std/crypto": "jsr:@std/crypto@^1.0.4",

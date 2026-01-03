@@ -4,6 +4,7 @@ export const SIMULATION_ACCOUNT: string = "GALAXYVOIDAOPZTDLHILAJQKCVVFMD4IKLXLS
 export const REGISTRY_CONTRACT: string = "CC75Z72OCE667WVPQOROIWDAGBOXFNJ4VQONQEURL74EYIDLWA4F7FEN";
 export const KEY_VALUE_DB_CONTRACT: string = "CDH2T2CBGFPFNVRWFK4XJIRP6VOWSVTSDCRBCJ2TEIO22GADQP6RG3Y6";
 export const REVERSE_REGISTRAR_CONTRACT: string = "CCAU556HKCUXF4LBPUV2KROU5FYGC6227G2LD3SVQ6GR6654IVTO2GBO";
+export const NFD_CONTRACT: string = "CADCRH6BW3MIZBBE7JOVKROR2GBEG64TJDT5Y3EX3OOIWRDZOOT5XUHD";
 
 export interface SorobanDomainsSDKParams {
   /**
@@ -69,7 +70,10 @@ export interface Domain {
 
   // The snapshot is a value used as a flag for checking if other records are valid
   // The snapshot is the timestamp it was created
-  snapshot: string;
+  snapshot: number;
+
+  // The date the domain will expire
+  exp_date: number;
 }
 
 export interface SubDomain {
@@ -90,7 +94,7 @@ export interface SubDomain {
 
   // The snapshot is taken from the parent domain
   // If the subdomain snapshot is different from the parent one, it means the subdomain is invalid
-  snapshot: string;
+  snapshot: number;
 }
 
 export enum RecordKey {

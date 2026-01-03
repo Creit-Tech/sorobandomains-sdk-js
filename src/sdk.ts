@@ -1,4 +1,4 @@
-import type { Domain, SubDomain } from "./types.ts";
+import { type Domain, NFD_CONTRACT, type SubDomain } from "./types.ts";
 import {
   type DomainStorageValue,
   KEY_VALUE_DB_CONTRACT,
@@ -13,6 +13,7 @@ import { concat } from "@std/bytes";
 import { DomainData404Error, DomainDataUnsupportedValueType, ReverseDomain404Error } from "./errors.ts";
 import {
   Account,
+  Address,
   Contract,
   nativeToScVal,
   Networks,
@@ -24,6 +25,7 @@ import {
 } from "@stellar/stellar-sdk";
 import { decodeHex } from "@std/encoding/hex";
 import { RegistryV2Client } from "./apis/mod.ts";
+import { StellarAssetsSdk } from "@creit-tech/stellar-assets-sdk";
 
 export class SorobanDomainsSDK {
   readonly #rpcUrl?: string;
@@ -367,7 +369,7 @@ export class SorobanDomainsSDK {
           parent: subDomain.parent.toString("hex"),
           root: subDomain.root.toString("hex"),
           node: subDomain.node.toString("hex"),
-          snapshot: subDomain.snapshot,
+          snapshot: Number(subDomain.snapshot),
         };
       } else {
         return {
@@ -375,13 +377,85 @@ export class SorobanDomainsSDK {
           domain: domain.domain.toString(),
           tld: domain.tld.toString(),
           node: domain.node.toString("hex"),
-          snapshot: domain.snapshot,
+          snapshot: Number(domain.snapshot),
           token_id: domain.token_id,
+          exp_date: Number(domain.exp_date),
         };
       }
     }
 
     throw new Error("Unexpected Error, please contact support");
+  }
+
+  /**
+   * This method will search for all the domains an account hold, it will do this by fetching all issued NFDs and check those the account own
+   */
+  async fetchAllDomains(owner: string): Promise<Domain[]> {
+    if (!this.#rpcUrl) {
+      throw new Error("This method requires that you define an `rpcUrl` value.");
+    }
+    const sdk: StellarAssetsSdk = new StellarAssetsSdk({ rpcUrl: this.#rpcUrl, networkPassphrase: this.#network });
+    const tokenIds: number[] = await sdk.fetchOwnedNFTs(NFD_CONTRACT, owner);
+
+    const nodesLedgersKeys: xdr.LedgerKey[] = [];
+    for (const tokenId of tokenIds) {
+      nodesLedgersKeys.push(xdr.LedgerKey.contractData(
+        new xdr.LedgerKeyContractData({
+          contract: new Address(NFD_CONTRACT).toScAddress(),
+          key: xdr.ScVal.scvVec([xdr.ScVal.scvSymbol("TokenNode"), xdr.ScVal.scvU32(tokenId)]),
+          durability: xdr.ContractDataDurability.persistent(),
+        }),
+      ));
+    }
+
+    const nodesResults: rpc.Api.LedgerEntryResult[] = [];
+    while (nodesLedgersKeys.length > 0) {
+      const chunk: xdr.LedgerKey[] = nodesLedgersKeys.splice(0, 200);
+      const result: rpc.Api.GetLedgerEntriesResponse = await this.server.getLedgerEntries(...chunk);
+      for (const entry of result.entries) {
+        nodesResults.push(entry);
+      }
+    }
+
+    const nodes: Array<Buffer> = [];
+    for (const result of nodesResults) {
+      nodes.push(scValToNative(result.val.contractData().val()));
+    }
+
+    const domainsLedgersKeys: xdr.LedgerKey[] = [];
+    for (const node of nodes) {
+      domainsLedgersKeys.push(xdr.LedgerKey.contractData(
+        new xdr.LedgerKeyContractData({
+          contract: new Address(REGISTRY_CONTRACT).toScAddress(),
+          key: xdr.ScVal.scvVec([xdr.ScVal.scvSymbol("Domain"), xdr.ScVal.scvBytes(node)]),
+          durability: xdr.ContractDataDurability.persistent(),
+        }),
+      ));
+    }
+
+    const results: rpc.Api.LedgerEntryResult[] = [];
+    while (domainsLedgersKeys.length > 0) {
+      const chunk: xdr.LedgerKey[] = domainsLedgersKeys.splice(0, 200);
+      const result: rpc.Api.GetLedgerEntriesResponse = await this.server.getLedgerEntries(...chunk);
+      for (const entry of result.entries) {
+        results.push(entry);
+      }
+    }
+
+    const domains: Array<any> = [];
+    for (const result of results) {
+      domains.push(scValToNative(result.val.contractData().val()));
+    }
+
+    return domains.map((domain): Domain => ({
+      address: domain.address,
+      domain: domain.domain.toString(),
+      tld: domain.tld.toString(),
+      node: domain.node.toString("hex"),
+      snapshot: Number(domain.snapshot),
+      token_id: domain.token_id,
+      exp_date: Number(domain.exp_date),
+    }));
   }
 
   async getDomainData(params: { node: string; key: string }): Promise<DomainStorageValue> {

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file. See
 [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.1] (2026-01-02)
+
+### Add
+
+- Add new `fetchAllDomains` method
+
+### Change
+
+- Add `exp_date` to the Domain
+- change `snapshot` type from string to number
+
 ### [1.0.0] (2026-01-01)
 
 This is a full upgrade and it's not compatible with the Registry V1.

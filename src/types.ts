@@ -56,6 +56,8 @@ export interface SorobanDomainsSDKParams {
 }
 
 export interface Domain {
+  type: RecordKey.Domain;
+
   domain: string;
   tld: string;
 
@@ -77,6 +79,8 @@ export interface Domain {
 }
 
 export interface SubDomain {
+  type: RecordKey.SubDomain;
+
   // This is the subdomain value
   domain: string;
 

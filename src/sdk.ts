@@ -1,11 +1,14 @@
-import { type Domain, NFD_CONTRACT, type SubDomain } from "./types.ts";
 import {
+  type Domain,
   type DomainStorageValue,
   KEY_VALUE_DB_CONTRACT,
+  NFD_CONTRACT,
+  RecordKey,
   REGISTRY_CONTRACT,
   REVERSE_REGISTRAR_CONTRACT,
   SIMULATION_ACCOUNT,
   type SorobanDomainsSDKParams,
+  type SubDomain,
 } from "./types.ts";
 import { Buffer } from "buffer";
 import { crypto } from "@std/crypto";
@@ -364,15 +367,17 @@ export class SorobanDomainsSDK {
       const [domain, subDomain] = scValToNative(sim.result!.retval);
       if (subDomain) {
         return {
+          type: RecordKey.SubDomain,
           address: subDomain.address,
           domain: subDomain.domain.toString(),
           parent: subDomain.parent.toString("hex"),
           root: subDomain.root.toString("hex"),
           node: subDomain.node.toString("hex"),
           snapshot: Number(subDomain.snapshot),
-        };
+        } satisfies SubDomain;
       } else {
         return {
+          type: RecordKey.Domain,
           address: domain.address,
           domain: domain.domain.toString(),
           tld: domain.tld.toString(),
@@ -380,7 +385,7 @@ export class SorobanDomainsSDK {
           snapshot: Number(domain.snapshot),
           token_id: domain.token_id,
           exp_date: Number(domain.exp_date),
-        };
+        } satisfies Domain;
       }
     }
 
@@ -448,6 +453,7 @@ export class SorobanDomainsSDK {
     }
 
     return domains.map((domain): Domain => ({
+      type: RecordKey.Domain,
       address: domain.address,
       domain: domain.domain.toString(),
       tld: domain.tld.toString(),

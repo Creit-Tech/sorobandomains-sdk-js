@@ -27,7 +27,7 @@ import {
   xdr,
 } from "@stellar/stellar-sdk";
 import { decodeHex } from "@std/encoding/hex";
-import { RegistryV2Client } from "./apis/mod.ts";
+import { RegistryV2Client, RegistryV2Errors } from "./apis/mod.ts";
 import { StellarAssetsSdk } from "@creit-tech/stellar-assets-sdk";
 
 export class SorobanDomainsSDK {
@@ -42,6 +42,13 @@ export class SorobanDomainsSDK {
   readonly #defaultTimeout: number;
 
   readonly registryV2Client: RegistryV2Client;
+
+  static assertContractError(sim: rpc.Api.SimulateTransactionResponse): void {
+    if (rpc.Api.isSimulationError(sim)) {
+      const { message } = (RegistryV2Errors as any)[Number(sim.error.split("\n")[0].replace(/\D/g, ""))];
+      throw new Error(message);
+    }
+  }
 
   get server(): rpc.Server {
     if (!this.#rpcUrl) {
@@ -150,11 +157,11 @@ export class SorobanDomainsSDK {
     this.registryV2Client.options.publicKey = params.source;
     const domainChunks: string[] = SorobanDomainsSDK.generateDomainChunks(params.domain);
     const tld: string = domainChunks.shift()!;
-    let tx: Transaction;
+
     if (domainChunks.length > 1) {
       const subdomain: string = domainChunks.pop()!;
       const parentNode: Uint8Array = SorobanDomainsSDK.generateNode(domainChunks, tld);
-      const { raw } = await this.registryV2Client.register_sub({
+      const { built, simulation } = await this.registryV2Client.register_sub({
         address: params.address,
         new_subdomain: Buffer.from(subdomain),
         parent: {
@@ -163,12 +170,14 @@ export class SorobanDomainsSDK {
         },
       }, {
         fee: this.#globalFee,
-        simulate: false,
+        simulate: true,
         timeoutInSeconds: 0,
       });
-      tx = raw!.build();
+
+      SorobanDomainsSDK.assertContractError(simulation!);
+      return built!;
     } else {
-      const { raw } = await this.registryV2Client.register({
+      const { built, simulation } = await this.registryV2Client.register({
         new_domain: Buffer.from(domainChunks[0]),
         tld: Buffer.from(tld),
         address: params.address,
@@ -176,12 +185,13 @@ export class SorobanDomainsSDK {
         periods: params.periods || 1n,
       }, {
         fee: this.#globalFee,
-        simulate: false,
+        simulate: true,
         timeoutInSeconds: 0,
       });
-      tx = raw!.build();
+
+      SorobanDomainsSDK.assertContractError(simulation!);
+      return built!;
     }
-    return this.server.prepareTransaction(tx);
   }
 
   /**
@@ -201,7 +211,7 @@ export class SorobanDomainsSDK {
     const domainChunks: string[] = SorobanDomainsSDK.generateDomainChunks(params.domain);
     const tld: string = domainChunks.shift()!;
     const node: Uint8Array = SorobanDomainsSDK.generateNode(domainChunks, tld);
-    const { raw } = await this.registryV2Client.update_address({
+    const { built, simulation } = await this.registryV2Client.update_address({
       new_address: params.newAddress,
       record_key: {
         values: [Buffer.from(node)],
@@ -209,10 +219,12 @@ export class SorobanDomainsSDK {
       },
     }, {
       fee: this.#globalFee,
-      simulate: false,
+      simulate: true,
       timeoutInSeconds: 0,
     });
-    return this.server.prepareTransaction(raw!.build());
+
+    SorobanDomainsSDK.assertContractError(simulation!);
+    return built!;
   }
 
   /**
@@ -235,16 +247,18 @@ export class SorobanDomainsSDK {
     const domainChunks: string[] = SorobanDomainsSDK.generateDomainChunks(params.domain);
     const tld: string = domainChunks.shift()!;
     const node: Uint8Array = SorobanDomainsSDK.generateNode(domainChunks, tld);
-    const { raw } = await this.registryV2Client.renew({
+    const { built, simulation } = await this.registryV2Client.renew({
       caller: params.payer,
       node: Buffer.from(node),
       periods: BigInt(params.periods),
     }, {
       fee: this.#globalFee,
-      simulate: false,
+      simulate: true,
       timeoutInSeconds: 0,
     });
-    return this.server.prepareTransaction(raw!.build());
+
+    SorobanDomainsSDK.assertContractError(simulation!);
+    return built!;
   }
 
   /**
@@ -268,17 +282,19 @@ export class SorobanDomainsSDK {
     const domainChunks: string[] = SorobanDomainsSDK.generateDomainChunks(params.domain);
     const tld: string = domainChunks.shift()!;
     const node: Uint8Array = SorobanDomainsSDK.generateNode(domainChunks, tld);
-    const { raw } = await this.registryV2Client.claim({
+    const { built, simulation } = await this.registryV2Client.claim({
       caller: params.buyer,
       node: Buffer.from(node),
       address: params.address,
       periods: BigInt(params.periods),
     }, {
       fee: this.#globalFee,
-      simulate: false,
+      simulate: true,
       timeoutInSeconds: 0,
     });
-    return this.server.prepareTransaction(raw!.build());
+
+    SorobanDomainsSDK.assertContractError(simulation!);
+    return built!;
   }
 
   /**
@@ -296,14 +312,16 @@ export class SorobanDomainsSDK {
     const domainChunks: string[] = SorobanDomainsSDK.generateDomainChunks(params.domain);
     const tld: string = domainChunks.shift()!;
     const node: Uint8Array = SorobanDomainsSDK.generateNode(domainChunks, tld);
-    const { raw } = await this.registryV2Client.evict({
+    const { built, simulation } = await this.registryV2Client.evict({
       node: Buffer.from(node),
     }, {
       fee: this.#globalFee,
-      simulate: false,
+      simulate: true,
       timeoutInSeconds: 0,
     });
-    return this.server.prepareTransaction(raw!.build());
+
+    SorobanDomainsSDK.assertContractError(simulation!);
+    return built!;
   }
 
   /**
@@ -322,15 +340,17 @@ export class SorobanDomainsSDK {
     const [tld, domain]: string[] = params.domain.split(".").toReversed().map((item: string): string =>
       item.trim().toLowerCase()
     );
-    const { raw } = await this.registryV2Client.migrate({
+    const { built, simulation } = await this.registryV2Client.migrate({
       new_domain: Buffer.from(domain),
       tld: Buffer.from(tld),
     }, {
       fee: this.#globalFee,
-      simulate: false,
+      simulate: true,
       timeoutInSeconds: 0,
     });
-    return this.server.prepareTransaction(raw!.build());
+
+    SorobanDomainsSDK.assertContractError(simulation!);
+    return built!;
   }
 
   /**
@@ -359,9 +379,7 @@ export class SorobanDomainsSDK {
 
     const sim = await this.server.simulateTransaction(tx);
 
-    if (rpc.Api.isSimulationError(sim)) {
-      throw new Error(sim.error);
-    }
+    SorobanDomainsSDK.assertContractError(sim);
 
     if (rpc.Api.isSimulationSuccess(sim)) {
       const [domain, subDomain] = scValToNative(sim.result!.retval);

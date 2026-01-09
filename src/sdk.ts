@@ -333,7 +333,6 @@ export class SorobanDomainsSDK {
    */
   async migrateFromV1(params: {
     domain: string;
-    tld: string;
     source: string;
   }): Promise<Transaction> {
     this.registryV2Client.options.publicKey = params.source;

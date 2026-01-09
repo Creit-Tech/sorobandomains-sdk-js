@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.4] (2026-01-09)
+
+### Fix
+
+- Remove unnecessary parameter in the method `migrateFromV1`
+
 ### [1.0.3] (2026-01-06)
 
 ### Add
